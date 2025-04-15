@@ -1,6 +1,9 @@
 #include <bits/stdc++.h>
 #include "lossFunctions.hpp"
 
+#pragma GCC optimize("O3,Ofast,unroll-loops")
+#pragma GCC targe("avx2,bmi,fma")
+
 using namespace std;
 
 struct dule;
@@ -41,6 +44,7 @@ signed main() {
     int mxW, mxS;
     cin >> mxW >> mxS;
     dule victory = dule(n, k, q, lessons, names,  gr, a, mxW, mxS);
+    victory.EVERY_DAY_IAM_SHUFFELING();
     victory.OTZHIGAY_TRATATATATA();
     victory.output();
     cout << endl << victory.getLoss();

@@ -6,12 +6,12 @@
 using namespace std;
 
 #define int long long
+#define endl "\n"
 
-mt19937 rng(12436);
+mt19937 rng(546411);
 
-constexpr double e = 2.71;
+constexpr double e = 2.71828;
 
-int getLoss();
 
 struct dule {
     int pars;
@@ -81,28 +81,24 @@ struct dule {
         int ans = 0;
         for (int day = 0; day < 5; day++) {
             for (int les = 0; les < maxWorkDays; les++) {
-                map<int, bool> cnt;
+                map<int, int> cnt;
                 for (int par = 0; par < s.size(); par++) {
                     for (int clas = 0; clas < s[par].size(); clas++) {
                         if (s[par][clas][day][les] == -1) continue;
-                        if (cnt[teachForClas[par][clas][s[par][clas][day][les]]]) {
-                            ans += 1e9;
-                        }
-                        cnt[teachForClas[par][clas][s[par][clas][day][les]]] = true;
+                        ans += cnt[teachForClas[par][clas][s[par][clas][day][les]]] * 1e9;
+                        cnt[teachForClas[par][clas][s[par][clas][day][les]]]++;
                     }
                 }
             }
         }
         int day = 5;
         for (int les = 0; les < maxSatDays; les++) {
-            map<int, bool> cnt;
+            map<int, int> cnt;
             for (int par = 0; par < s.size(); par++) {
                 for (int clas = 0; clas < s[par].size(); clas++) {
                     if (s[par][clas][day][les] == -1) continue;
-                    if (cnt[teachForClas[par][clas][s[par][clas][day][les]]]) {
-                        ans += 1e9;
-                    }
-                    cnt[teachForClas[par][clas][s[par][clas][day][les]]] = true;
+                    ans += cnt[teachForClas[par][clas][s[par][clas][day][les]]] * 1e9;
+                    cnt[teachForClas[par][clas][s[par][clas][day][les]]]++;
                 }
             }
         }
@@ -124,7 +120,7 @@ struct dule {
                                 cnt++;
                             }
                         }
-                        ans -= (double)(r - l) / cnt * 10;
+                        ans += (double)(r - l) * 5;
                     }
                 }
             }
@@ -172,30 +168,44 @@ struct dule {
 
     int fizra() {
         int ans = 0;
-        for (int par = 0; par < pars; par++) {
-            for (int day = 0; day < s[par][0].size(); day++) {
-                for (int les = 0; les < s[par][0][day].size(); les++) {
-                    if (teachForClas[par][0][s[par][0][day][les]] == teachForClas[par][1][s[par][1][day][les]])  {
-                        ans -= 1000;
+        for (int day = 0; day < 5; day++) {
+            for (int les = 0; les < maxWorkDays; les++) {
+                map<int, int> cnt;
+                for (int par = 0; par < s.size(); par++) {
+                    for (int clas = 0; clas < s[par].size(); clas++) {
+                        if (s[par][clas][day][les] != 15) continue;
+                        ans -= cnt[teachForClas[par][clas][s[par][clas][day][les]]] * 1e9;
+                        cnt[teachForClas[par][clas][s[par][clas][day][les]]]++;
                     }
-                    if (teachForClas[par][2][s[par][2][day][les]] == teachForClas[par][3][s[par][3][day][les]])  {
-                        ans -= 1000;
-                    }
+                }
+            }
+        }
+        int day = 5;
+        for (int les = 0; les < maxSatDays; les++) {
+            map<int, int> cnt;
+            for (int par = 0; par < s.size(); par++) {
+                for (int clas = 0; clas < s[par].size(); clas++) {
+                    if (s[par][clas][day][les] != 15) continue;
+                    ans -= cnt[teachForClas[par][clas][s[par][clas][day][les]]] * 1e9;
+                    cnt[teachForClas[par][clas][s[par][clas][day][les]]]++;
                 }
             }
         }
         return ans;
     }
 
-    int threeInRow() {
+    int threeInDay() {
         int ans = 0;
         for (int par = 0; par < pars; par++) {
             for (int clas = 0; clas < s[par].size(); clas++) {
                 for (int day = 0; day < s[par][clas].size(); day++) {
+                    map<int, int> cnt;
                     for (int les = 0; les < s[par][clas][day].size() - 3; les++) {
-                        if (s[par][clas][day][les] == s[par][clas][day][les + 1] == s[par][clas][day][les + 2] == s[par][clas][day][les + 3]) {
-                            ans += 1e9;
-                        }
+                        cnt[s[par][clas][day][les]]++;
+                    }
+                    for (auto [l, r] : cnt) {
+                        ans += max(0ll, r - 3) * 1e10;
+                        ans += max(0ll, r - 2) * 1e7;
                     }
                 }
             }
@@ -204,13 +214,32 @@ struct dule {
     }
 
     int getLoss() {
-        return Pers() + comfort() + noskip() + teacherRelax() + fizra() + threeInRow();
+        return Pers() + teacherRelax() + fizra() + noskip() + threeInDay() + comfort();
+    }
+
+    void EVERY_DAY_IAM_SHUFFELING() {
+        for (int i = 0; i < 1e6; i++) {
+            int par = abs((int)rng()) % s.size();
+            int clas = abs((int)rng()) % s[par].size();
+            int day1 = abs((int)rng()) % s[par][clas].size();
+            int day2 = abs((int)rng()) % s[par][clas].size();
+            int les1 = abs((int)rng()) % s[par][clas][day1].size();
+            int les2 = abs((int)rng()) % s[par][clas][day2].size();
+            swap(s[par][clas][day1][les1], s[par][clas][day2][les2]);
+            par = abs((int)rng()) % s.size();
+            clas = abs((int)rng()) % s[par].size();
+            int les = abs((int)rng()) % backToSubj.size();
+            int nw = teach[subj[teachForClas[par][clas][les]]][abs((int)rng()) % teach[subj[teachForClas[par][clas][les]]].size()];
+            teachForClas[par][clas][les] = nw;
+        }
     }
 
     void OTZHIGAY_TRATATATATA() {
-        double d = 0.9991;
+        //freopen("output.txt", "w", stdout);
+        double d = 0.99999;
         int cnt = 0;
-        for (double temperature = 1e7; temperature >= 1; temperature *= d) {
+        int already = 0;
+        for (double temperature = 1e8; getLoss() > 5e8; temperature *= d) {
             cnt++;
             dule last = *this;
                 int par = abs((int)rng()) % s.size();
@@ -227,20 +256,26 @@ struct dule {
                 teachForClas[par][clas][les] = nw;
             if (getLoss() > last.getLoss()) {
                 s = last.s;
+                already++;
                 teachForClas = last.teachForClas;
-            } else if ((double)rng() / INT32_MAX >= pow(e, (last.getLoss() - getLoss()) / temperature)) {
+            } else if (((double) rand() / RAND_MAX) >= exp(((double)last.getLoss() - getLoss()) / temperature)) {
                 s = last.s;
                 teachForClas = last.teachForClas;
             }
-     //       cout << "Step " << cnt << "temperature: " << temperature << endl;
+            if (already == 40000) {
+                temperature *= 2;
+                already = 0;
+            }
+        //    cout << cnt << " " << getLoss() << endl;
         }
+        //fclose(stdout);
     }
 
 
     void output() {
         for (int par = 0; par < s.size(); par++) {
             for (int clas = 0; clas < s[par].size(); clas++) {
-                cout << par + 1 + 5;
+                cout << par + 7;
                 cout << "." << clas + 1 << ":" << endl;
                 for (int day = 0; day < 6; day++) {
                     cout << "Day " << day + 1 << ": ";
